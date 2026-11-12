@@ -1,0 +1,60 @@
+/* stage.css: base layer for immersive-3d-site. Theme with the tokens, never edit the rules per project. */
+
+:root {
+  --canvas: #0b0c0f;      /* page ground, also the WebGL clear colour */
+  --surface: #15171c;     /* cards and panels */
+  --ink: #f2efe9;         /* body text */
+  --ink-soft: #a29d95;    /* secondary text */
+  --accent: #e8542f;      /* one accent, used sparingly */
+  --accent-ink: #120d0b;  /* text on the accent */
+  --font-display: system-ui, sans-serif;
+  --font-text: system-ui, sans-serif;
+  --gutter: clamp(20px, 5vw, 72px);
+  --measure: 34rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background: var(--canvas); color: var(--ink); -webkit-text-size-adjust: 100%; }
+body { margin: 0; font-family: var(--font-text); line-height: 1.55; overflow-x: clip; }
+img, video, canvas, svg { display: block; max-width: 100%; }
+
+/* The one shared WebGL canvas, fixed behind everything. */
+canvas[data-stage] {
+  position: fixed; inset: 0; width: 100vw; height: 100svh; z-index: 0;
+  transition: opacity 0.2s linear;
+}
+
+/* Every act is a tall section; its content sits in a sticky frame the height of the screen. */
+[data-act] { position: relative; z-index: 1; overflow-x: clip; } /* clip, not hidden: hidden would break sticky */
+[data-act] > .frame {
+  position: sticky; top: 0; height: 100svh;
+  display: grid; padding: var(--gutter);
+}
+
+/* Readability without a full-screen overlay: a soft scrim only behind the text block. */
+.scrim { position: relative; isolation: isolate; }
+.scrim::before {
+  content: ""; position: absolute; inset: -18% -14%; z-index: -1; pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--canvas) 72%, transparent), transparent);
+}
+
+/* Plain DOM reveal. Elements with data-reveal arrive when they enter; stagger with style="--i:2". */
+[data-reveal] {
+  opacity: 0; transform: translate3d(0, 28px, 0);
+  transition: opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.9s cubic-bezier(.2,.7,.2,1);
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+[data-reveal].is-in { opacity: 1; transform: none; }
+
+/* Posters: shown only when WebGL is missing. Give each act a poster image or a CSS gradient. */
+.poster { display: none; position: absolute; inset: 0; z-index: -1; background-size: cover; background-position: center; }
+.no-webgl .poster { display: block; }
+.no-webgl canvas[data-stage] { display: none; }
+
+/* Reduced motion: content is all present, nothing travels. Acts read state.reduced for the 3D side. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  canvas[data-stage] { transition: none; }
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbis · desk speaker</title>
+<meta name="description" content="Orbis, a glass desk speaker. Starter page for the immersive-3d-site skill.">
+<!--
+  STARTER PAGE for immersive-3d-site. A fictional brand (Orbis, a glass desk speaker) that exercises
+  every part of the engine: a glass hero with bloom, a particle morph, a camera rail, an exploded view
+  and a close. It exists to prove the kit runs and to show the patterns. Never ship it as a site:
+  copy the patterns you need into a page built from the brief.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="stage.css">
+<style>
+  :root {
+    --canvas: #0c0d10; --surface: #16181d; --ink: #f1eee8; --ink-soft: #9c978f;
+    --accent: #ff6a3d; --accent-ink: #160c08;
+    --font-display: "Syne", system-ui, sans-serif; --font-text: "Inter", system-ui, sans-serif;
+  }
+  h1, h2 { font-family: var(--font-display); font-weight: 800; line-height: 0.95; letter-spacing: -0.02em; margin: 0; }
+  h1 { font-size: clamp(3.4rem, 13vw, 11rem); }
+  h2 { font-size: clamp(2.2rem, 6.5vw, 5.4rem); }
+  p { margin: 0; max-width: var(--measure); color: var(--ink-soft); font-size: clamp(1rem, 1.3vw, 1.15rem); }
+  .btn {
+    display: inline-flex; align-items: center; gap: .6em; padding: 1em 1.5em; border-radius: 999px;
+    background: var(--accent); color: var(--accent-ink); font-weight: 500; text-decoration: none; min-height: 48px;
+    transition: transform .25s cubic-bezier(.2,.7,.2,1);
+  }
+  .btn:hover { transform: translateY(-2px); }
+  nav { position: fixed; z-index: 5; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 18px var(--gutter); }
+  nav b { font-family: var(--font-display); font-size: 1.2rem; letter-spacing: .04em; }
+  nav a { color: var(--ink); text-decoration: none; font-size: .95rem; opacity: .85; }
+
+  /* hero: headline bottom left, drifts up and out as p rises */
+  [data-act="hero"] .frame { align-content: end; }
+  [data-act="hero"] .copy { transform: translate3d(0, calc(var(--p) * -12vh), 0); opacity: calc(1 - var(--p) * 1.6); }
+  [data-act="hero"] p { margin-top: 1.2rem; color: var(--ink); opacity: .8; }
+
+  /* morph: three short lines on the right, one at a time, driven by data-beat */
+  [data-act="morph"] .frame { justify-items: end; align-content: end; text-align: right; }
+  [data-act="morph"] .beat { grid-area: 1 / 1; opacity: 0; transform: translateY(16px); transition: opacity .5s, transform .6s cubic-bezier(.2,.7,.2,1); }
+  [data-act="morph"][data-beat="0"] .beat:nth-child(1),
+  [data-act="morph"][data-beat="1"] .beat:nth-child(2),
+  [data-act="morph"][data-beat="2"] .beat:nth-child(3) { opacity: 1; transform: none; }
+  [data-act="morph"] .beats { display: grid; }
+
+  /* rail: one line top centre, grows slightly through the flight */
+  [data-act="rail"] .frame { justify-items: center; align-content: start; text-align: center; padding-top: 18vh; }
+  [data-act="rail"] h2 { transform: scale(calc(0.9 + var(--p) * 0.2)); }
+
+  /* explode: labels left, product right */
+  [data-act="explode"] .frame { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; }
+  [data-act="explode"] ol { list-style: none; padding: 0; margin: 1.6rem 0 0; display: grid; gap: .9rem; }
+  [data-act="explode"] li { display: grid; grid-template-columns: 2.2rem 1fr; color: var(--ink-soft); }
+  [data-act="explode"] li b { color: var(--accent); font-weight: 500; }
+
+  /* close: resolves and holds */
+  [data-act="close"] .frame { align-content: center; }
+  [data-act="close"] p { margin: 1.2rem 0 2rem; }
+  footer { position: relative; z-index: 1; padding: 28px var(--gutter); color: var(--ink-soft); font-size: .85rem; }
+
+  @media (max-width: 760px) {
+    [data-act="explode"] .frame { grid-template-columns: 1fr; align-content: end; }
+    [data-act="morph"] .frame { justify-items: start; text-align: left; align-content: end; }
+    [data-act="close"] .frame { align-content: end; padding-bottom: 10svh; }
+    [data-act="explode"] ol { gap: .5rem; margin-top: 1rem; }
+  }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas data-stage aria-hidden="true"></canvas>
+<nav><b>ORBIS</b><a href="#buy">Order</a></nav>
+
+<main>
+  <section data-act="hero" data-span="2">
+    <div class="poster" style="background: radial-gradient(circle at 60% 40%, #3a2a24, var(--canvas) 60%)"></div>
+    <div class="frame"><div class="copy scrim">
+      <h1>Sound,<br>held in glass.</h1>
+      <p>Orbis is a desk speaker made from one piece of glass. Nothing to hide, so nothing hidden.</p>
+    </div></div>
+  </section>
+
+  <section data-act="morph" data-span="3">
+    <div class="frame"><div class="beats scrim">
+      <div class="beat"><h2>It starts<br>as noise.</h2></div>
+      <div class="beat"><h2>Then it<br>finds a shape.</h2></div>
+      <div class="beat"><h2>Then it<br>has a name.</h2></div>
+    </div></div>
+  </section>
+
+  <section data-act="rail" data-span="3">
+    <div class="frame"><div class="scrim"><h2>Ninety rings of<br>tuned resonance.</h2></div></div>
+  </section>
+
+  <section data-act="explode" data-span="2.5">
+    <div class="frame">
+      <div class="scrim">
+        <h2>Five parts.<br>No screws.</h2>
+        <ol>
+          <li data-reveal style="--i:0"><b>1</b>Glass shell, blown and annealed</li>
+          <li data-reveal style="--i:1"><b>2</b>Copper voice coil</li>
+          <li data-reveal style="--i:2"><b>3</b>Damping ring, cork</li>
+          <li data-reveal style="--i:3"><b>4</b>Amplifier board</li>
+          <li data-reveal style="--i:4"><b>5</b>Stone base, 1.2kg</li>
+        </ol>
+      </div>
+      <div></div>
+    </div>
+  </section>
+
+  <section data-act="close" data-span="1.5" id="buy">
+    <div class="frame"><div class="scrim">
+      <h2>Orbis.<br>£340.</h2>
+      <p>Made to order in small batches. Ships in three weeks.</p>
+      <a class="btn" href="#buy">Order yours</a>
+    </div></div>
+  </section>
+</main>
+<footer>Orbis is a fictional product on the immersive-3d-site starter page.</footer>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { createStage, ease, seg, lerp } from './stage.js';
+
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const C = { canvas: new THREE.Color(css('--canvas')), ink: new THREE.Color(css('--ink')), accent: new THREE.Color(css('--accent')) };
+
+const stage = createStage();
+const { renderer, state } = stage;
+if (!renderer) { stage.start(); throw new Error('no webgl, posters showing'); }
+
+// Studio lighting with no downloads: RoomEnvironment through PMREM gives every material real reflections.
+const pmrem = new THREE.PMREMGenerator(renderer);
+const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const aspectZ = (z) => z * Math.max(1, Math.pow(1 / (state.width / state.height), 0.75)); // pull back on tall screens
+function makeComposer(scene, camera, strength = 0.6) {
+  const c = new EffectComposer(renderer);
+  c.addPass(new RenderPass(scene, camera));
+  const bloom = new UnrealBloomPass(new THREE.Vector2(state.width, state.height), strength, 0.45, 0.9);
+  c.addPass(bloom); c.addPass(new OutputPass());
+  return c;
+}
+function baseScene(fog) {
+  const s = new THREE.Scene(); s.background = C.canvas.clone(); s.environment = env;
+  if (fog) s.fog = new THREE.FogExp2(C.canvas, fog);
+  return s;
+}
+
+// A blobby sphere: cheap CPU displacement, then recompute normals. Good stand-in for any organic hero form.
+function blob(radius, detail, amp) {
+  const g = new THREE.IcosahedronGeometry(radius, detail);
+  const p = g.attributes.position, v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i);
+    const n = Math.sin(v.x * 2.1 + v.y * 1.3) * Math.sin(v.y * 1.7 + v.z * 2.3) * Math.sin(v.z * 1.9 + v.x * 1.1);
+    v.multiplyScalar(1 + amp * n); p.setXYZ(i, v.x, v.y, v.z);
+  }
+  g.computeVertexNormals(); return g;
+}
+const glass = new THREE.MeshPhysicalMaterial({
+  color: 0xffffff, roughness: 0.06, metalness: 0, transmission: 1, thickness: 1.4, ior: 1.5,
+  iridescence: 0.35, iridescenceIOR: 1.3, clearcoat: 1, attenuationColor: C.accent, attenuationDistance: 6,
+});
+
+/* ---------- act 1: hero. Glass orb in front of a glowing ring, orbiting shards, bloom, dolly on scroll ---------- */
+{
+  const scene = baseScene();
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+  const orb = new THREE.Mesh(blob(1.25, 40, 0.09), glass); scene.add(orb);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.05, 16, 160), new THREE.MeshBasicMaterial({ color: C.accent.clone().multiplyScalar(2.2) }));
+  ring.position.z = -2.2; scene.add(ring);
+  const shards = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.07), new THREE.MeshStandardMaterial({ roughness: 0.25, metalness: 0.9 }), 140);
+  const orbit = [];
+  for (let i = 0; i < shards.count; i++) {
+    orbit.push({ r: 2 + Math.random() * 2.2, a: Math.random() * Math.PI * 2, y: (Math.random() - 0.5) * 2.4, s: 0.5 + Math.random() * 1.5, k: 0.1 + Math.random() * 0.3 });
+    shards.setColorAt(i, Math.random() < 0.18 ? C.accent : C.ink);
+  }
+  scene.add(shards);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), pos = new THREE.Vector3(), sc = new THREE.Vector3();
+  const composer = makeComposer(scene, camera, 0.55);
+  stage.act('hero', {
+    scene, camera,
+    update(p, s) {
+      const e = ease.inOut(p);
+      camera.position.set(s.pointer.x * 0.4, s.pointer.y * 0.25, aspectZ(lerp(8, 4.6, e)));
+      camera.lookAt(0, 0, 0);
+      orb.rotation.set(s.time * 0.1 + p * 1.2, s.time * 0.17 + p * 2.4, 0);
+      ring.rotation.set(0.25 + 0.35 * e, s.time * 0.05 + s.pointer.x * 0.2, 0);
+      ring.scale.setScalar(1 + e * 0.35);
+      orbit.forEach((o, i) => {
+        const a = o.a + s.time * o.k * (s.reduced ? 0 : 1) + p * 2;
+        pos.set(Math.cos(a) * o.r * (1 + e * 0.6), o.y * (1 + e), Math.sin(a) * o.r * (1 + e * 0.6) - 1);
+        q.setFromEuler(new THREE.Euler(a, a * 0.7, 0)); sc.setScalar(o.s);
+        shards.setMatrixAt(i, m.compose(pos, q, sc));
+      });
+      shards.instanceMatrix.needsUpdate = true;
+    },
+    render() { composer.render(); },
+    resize(w, h) { composer.setSize(w, h); },
+  });
+}
+
+/* ---------- act 2: particle morph. Cloud to torus knot to the brand word, staggered per particle ---------- */
+{
+  const scene = baseScene();
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+  const N = state.coarse ? 7000 : 16000;
+  const A = new Float32Array(N * 3), B = new Float32Array(N * 3), W = new Float32Array(N * 3), seed = new Float32Array(N);
+  // A: loose noisy cloud
+  for (let i = 0; i < N; i++) {
+    const r = 2.6 + Math.random() * 1.8, t = Math.random() * Math.PI * 2, u = Math.acos(2 * Math.random() - 1);
+    A.set([r * Math.sin(u) * Math.cos(t), r * Math.sin(u) * Math.sin(t), r * Math.cos(u)], i * 3); seed[i] = Math.random();
+  }
+  // B: points along a torus knot tube
+  const knot = new THREE.TorusKnotGeometry(1.5, 0.42, 400, 32).attributes.position;
+  for (let i = 0; i < N; i++) { const k = Math.floor(Math.random() * knot.count); B.set([knot.getX(k), knot.getY(k), knot.getZ(k)], i * 3); }
+  // W: the word, sampled from text drawn on a 2D canvas. Swap the word and font for the brand.
+  const tc = document.createElement('canvas'); tc.width = 1024; tc.height = 300;
+  const tx = tc.getContext('2d'); tx.fillStyle = '#fff'; tx.font = '800 230px Syne, system-ui, sans-serif'; tx.textAlign = 'center'; tx.textBaseline = 'middle';
+  await document.fonts.load('800 230px Syne').catch(() => {});
+  tx.fillText('ORBIS', 512, 160);
+  const px = tx.getImageData(0, 0, 1024, 300).data, hits = [];
+  for (let y = 0; y < 300; y += 2) for (let x = 0; x < 1024; x += 2) if (px[(y * 1024 + x) * 4 + 3] > 128) hits.push([x, y]);
+  for (let i = 0; i < N; i++) { const [x, y] = hits[Math.floor(Math.random() * hits.length)] || [512, 150]; W.set([(x - 512) / 175, -(y - 160) / 175, (Math.random() - 0.5) * 0.25], i * 3); }
+
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(A, 3));
+  g.setAttribute('aB', new THREE.BufferAttribute(B, 3));
+  g.setAttribute('aC', new THREE.BufferAttribute(W, 3));
+  g.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
+  const mat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uMix: { value: 0 }, uTime: { value: 0 }, uSize: { value: 34 }, uPixel: { value: renderer.getPixelRatio() }, uInk: { value: C.ink }, uAccent: { value: C.accent } },
+    vertexShader: `
+      uniform float uMix, uTime, uSize, uPixel; attribute vec3 aB, aC; attribute float aSeed; varying float vSeed;
+      void main() {
+        float s1 = smoothstep(aSeed * 0.4, aSeed * 0.4 + 0.6, clamp(uMix, 0.0, 1.0));
+        float s2 = smoothstep(aSeed * 0.4, aSeed * 0.4 + 0.6, clamp(uMix - 1.0, 0.0, 1.0));
+        vec3 p = mix(mix(position, aB, s1), aC, s2);
+        p += 0.025 * vec3(sin(uTime + aSeed * 40.0), cos(uTime * 1.3 + aSeed * 30.0), sin(uTime * 0.7 + aSeed * 20.0));
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = uSize * uPixel / -mv.z;
+        vSeed = aSeed;
+      }`,
+    fragmentShader: `
+      uniform vec3 uInk, uAccent; varying float vSeed;
+      void main() {
+        float d = length(gl_PointCoord - 0.5); if (d > 0.5) discard;
+        gl_FragColor = vec4(mix(uInk, uAccent, step(0.8, vSeed)), smoothstep(0.5, 0.1, d));
+        #include <colorspace_fragment>
+      }`,
+  });
+  const points = new THREE.Points(g, mat); scene.add(points);
+  const section = document.querySelector('[data-act="morph"]');
+  stage.act('morph', {
+    scene, camera,
+    update(p, s) {
+      mat.uniforms.uMix.value = seg(p, 0.08, 0.42) + seg(p, 0.52, 0.86);
+      mat.uniforms.uTime.value = s.reduced ? 0 : s.time;
+      const word = seg(p, 0.55, 0.9);
+      points.rotation.y = lerp(s.time * 0.08 + p * 3, 0, ease.out(word));
+      points.rotation.x = lerp(0.3, 0, word);
+      points.scale.setScalar(lerp(1, Math.min(1, (s.width / s.height) * 1.2), word)); // the word fits a phone
+      camera.position.set(s.pointer.x * 0.5, s.pointer.y * 0.3, aspectZ(lerp(9, 7, word)));
+      camera.lookAt(0, 0, 0);
+      section.dataset.beat = p < 0.4 ? 0 : p < 0.72 ? 1 : 2;
+    },
+  });
+}
+
+/* ---------- act 3: camera rail. Fly a spline through instanced rings, accent ring every seventh, bloom ---------- */
+{
+  const scene = baseScene(0.055);
+  const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 120);
+  const curve = new THREE.CatmullRomCurve3([
+    [0, 0, 6], [1.5, 0.6, -6], [-2, -0.4, -18], [1, 1, -30], [3, -0.8, -42], [-1, 0.3, -54], [0, 0, -66], [0, 0, -74],
+  ].map((v) => new THREE.Vector3(...v)));
+  const rings = new THREE.InstancedMesh(new THREE.TorusGeometry(2.3, 0.035, 8, 96), new THREE.MeshBasicMaterial({ color: 0xffffff }), 90);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 0, 1), one = new THREE.Vector3(1, 1, 1);
+  for (let i = 0; i < rings.count; i++) {
+    const t = 0.04 + (i / rings.count) * 0.94, p = curve.getPointAt(t), tan = curve.getTangentAt(t);
+    q.setFromUnitVectors(up, tan); rings.setMatrixAt(i, m.compose(p, q, one));
+    rings.setColorAt(i, i % 7 === 3 ? C.accent.clone().multiplyScalar(2.5) : C.ink.clone().multiplyScalar(0.55));
+  }
+  scene.add(rings);
+  const blocks = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0x2a2c33, roughness: 0.35, metalness: 0.6 }), 220);
+  for (let i = 0; i < blocks.count; i++) {
+    const t = Math.random(), p = curve.getPointAt(t), a = Math.random() * Math.PI * 2, r = 4 + Math.random() * 7;
+    const h = 0.4 + Math.random() * 4;
+    m.compose(new THREE.Vector3(p.x + Math.cos(a) * r, p.y + Math.sin(a) * r, p.z), new THREE.Quaternion().setFromEuler(new THREE.Euler(a, a, 0)), new THREE.Vector3(0.4, h, 0.4));
+    blocks.setMatrixAt(i, m);
+  }
+  scene.add(blocks);
+  const composer = makeComposer(scene, camera, 0.9);
+  const at = new THREE.Vector3(), ahead = new THREE.Vector3();
+  stage.act('rail', {
+    scene, camera,
+    update(p, s) {
+      const t = ease.inOut(p) * 0.9;
+      curve.getPointAt(t, at); curve.getPointAt(Math.min(t + 0.025, 1), ahead);
+      camera.position.copy(at); camera.position.x += s.pointer.x * 0.3; camera.position.y += s.pointer.y * 0.2;
+      camera.lookAt(ahead);
+      camera.rotateZ(THREE.MathUtils.clamp(s.velocity * -0.00008, -0.12, 0.12)); // bank with scroll speed
+    },
+    render() { composer.render(); },
+    resize(w, h) { composer.setSize(w, h); },
+  });
+}
+
+/* ---------- act 4: exploded view. Parts separate along one axis, the whole object turns, pointer tilts ---------- */
+{
+  const scene = baseScene();
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
+  scene.add(new THREE.DirectionalLight(0xffffff, 1.2).translateX(3).translateY(5).translateZ(4));
+  const group = new THREE.Group(); scene.add(group);
+  const parts = [
+    { mesh: new THREE.Mesh(blob(1, 24, 0.03), glass), y: 0.9, out: 1.7 },
+    { mesh: new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.12, 24, 80), new THREE.MeshStandardMaterial({ color: 0xc8743f, metalness: 1, roughness: 0.28 })), y: 0.35, out: 1.3, rx: Math.PI / 2 },
+    { mesh: new THREE.Mesh(new THREE.TorusGeometry(0.8, 0.09, 16, 80), new THREE.MeshStandardMaterial({ color: 0x9a7b5a, roughness: 0.9 })), y: 0.05, out: 0.4, rx: Math.PI / 2 },
+    { mesh: new THREE.Mesh(new RoundedBoxGeometry(1.3, 0.08, 1.3, 4, 0.03), new THREE.MeshStandardMaterial({ color: 0x1d5c3a, roughness: 0.5, metalness: 0.3 })), y: -0.25, out: -0.6 },
+    { mesh: new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.25, 0.35, 64), new THREE.MeshStandardMaterial({ color: 0x3b3d42, roughness: 0.75 })), y: -0.55, out: -1.6 },
+  ];
+  parts.forEach((pt) => { if (pt.rx) pt.mesh.rotation.x = pt.rx; group.add(pt.mesh); });
+  const isNarrow = () => state.width < 760;
+  stage.act('explode', {
+    scene, camera,
+    update(p, s) {
+      const e = ease.inOut(seg(p, 0.1, 0.65));
+      parts.forEach((pt) => { pt.mesh.position.y = pt.y + pt.out * e; });
+      group.rotation.y = lerp(-0.7, 0.9, p) + s.pointer.x * 0.25;
+      group.rotation.x = 0.35 + s.pointer.y * 0.1;
+      group.position.x = isNarrow() ? 0 : 1.6;
+      group.position.y = isNarrow() ? 1.2 : 0;
+      camera.position.set(0, 0.6, aspectZ(lerp(9, 12, e)));
+      camera.lookAt(group.position.x * 0.5, group.position.y * 0.6, 0);
+    },
+  });
+}
+
+/* ---------- act 5: close. One orb, slow, at rest. The page lands here and holds ---------- */
+{
+  const scene = baseScene();
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+  const orb = new THREE.Mesh(blob(1.25, 40, 0.09), glass); scene.add(orb);
+  const halo = new THREE.Mesh(new THREE.RingGeometry(1.7, 1.74, 128), new THREE.MeshBasicMaterial({ color: C.accent.clone().multiplyScalar(2), side: THREE.DoubleSide }));
+  halo.position.z = -1.5; scene.add(halo);
+  const composer = makeComposer(scene, camera, 0.5);
+  stage.act('close', {
+    scene, camera,
+    update(p, s) {
+      const narrow = state.width < 760;
+      orb.position.set(narrow ? 0 : 1.9, narrow ? 2.1 : 0, 0); orb.scale.setScalar(narrow ? 0.75 : 1); halo.position.x = orb.position.x; halo.position.y = orb.position.y;
+      orb.rotation.y = s.time * 0.08; halo.scale.setScalar(lerp(0.8, 1, ease.out(p)) * (narrow ? 0.75 : 1));
+      camera.position.set(s.pointer.x * 0.3, s.pointer.y * 0.2, aspectZ(7)); camera.lookAt(0, 0, 0);
+    },
+    render() { composer.render(); },
+    resize(w, h) { composer.setSize(w, h); },
+  });
+}
+
+stage.start();
+</script>
+</body>
+</html>
