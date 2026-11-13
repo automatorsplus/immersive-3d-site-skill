@@ -43,6 +43,8 @@ screenshot in `report.json`.
 - Move the subject up and the copy down on phones rather than overlapping them.
 - Never rely on hover. The pointer barely moves on touch.
 - Test the phone run every time, not at the end.
+- The offset that lifts the subject on a phone can push the sun or the horizon out of frame. Set it per act, not once
+  for the whole page.
 
 ## Fallbacks
 

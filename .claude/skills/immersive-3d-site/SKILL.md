@@ -117,6 +117,9 @@ How the engine works (`engine/stage.js`, read the header comment):
   together, so a single continuous world is just several acts pointing at the same scene.
 - **An act needs a span above 1 for `p` to move.** `p` is measured over the distance the frame stays stuck, so a
   span of exactly 1 has none: `p` snaps from 0 to 1 and anything tied to it never shows. Use 1.25 or more.
+- **Anything you time yourself runs on real time, not `s.dt`.** A camera fly-to, a card opening or a light fading up
+  should measure its progress with `performance.now()`. `s.dt` is capped, so on a slow device an animation built on it
+  stalls and looks broken.
 - Every section gets `--p` as a CSS variable, so headings can move on the same timeline as the 3D.
 - `data-reveal` on any element fades it in on entry; stagger with `style="--i:2"`.
 - Use `seg(p, a, b)` to split one act into beats and `ease.inOut` and friends to shape them.

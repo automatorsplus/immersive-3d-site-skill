@@ -21,6 +21,12 @@ before writing markup.
   phone they stack: scene above, copy below, or copy at the bottom over a dark part of the scene.
 - Generous gutters (`--gutter`), nothing touching the edge.
 - One fixed nav, small: logo and the one action. No mega menu on a page like this.
+- **`.frame` is a grid.** To move a card sideways use `justify-items`, and `align-content` for up and down.
+  `justify-content` does nothing to it.
+- **A form in a two-column grid needs `minmax(0, 1fr)` columns and `min-width: 0` on its inputs,** or date fields
+  push it wider than a 390px screen.
+- **A detail card opened over the scene hides the act's own card.** Two cards on screen at once overlap on a phone
+  and split the eye on desktop.
 
 ## Colour
 

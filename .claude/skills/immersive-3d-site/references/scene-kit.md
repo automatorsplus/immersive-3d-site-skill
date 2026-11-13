@@ -137,6 +137,8 @@ before modelling it: sizes, layout, materials, the small details people who use 
   few broken pixels, and bloom turns one broken pixel into a white glare across the frame. If a glare appears from
   nowhere, hide one kind of object at a time until it goes.
 - Write what you found, and where, in `BRIEF.md`.
+- **Plants need leaf shapes.** Rounded lumps read as boulders up close, and a palm frond drawn as one flat blade reads
+  as a paddle. Give undergrowth leaves and give fronds leaflets.
 
 ## Post-processing
 
@@ -144,6 +146,9 @@ before modelling it: sizes, layout, materials, the small details people who use 
 around 0.9 so only true highlights glow. Near-white materials under bright lights cross that line and turn into lamps: use a
 dimmer white (about half) for chalk, rope or paper-coloured objects in a bloomed scene. Make it a per-act choice; acts with lots of text often look better
 without it. The act's `render()` calls `composer.render()` and `resize()` calls `composer.setSize()`.
+
+Ambient occlusion over thick fog draws dark specks on distant objects. Switch that pass off while the fog is heavy
+and bring it back as the fog clears.
 
 ## Pointer
 
